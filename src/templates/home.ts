@@ -25,6 +25,7 @@ export function renderHomePage(posts: PostSummary[]): string {
           .join('\n')}
     </ul>
     `;
+  const stylesheet = 'assets/main.css';
 
-  return renderLayout(title, contentList);
+  return renderLayout(title, contentList, stylesheet);
 }

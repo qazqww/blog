@@ -1,9 +1,14 @@
-export function renderLayout(title: string, content: string): string {
+export function renderLayout(
+  title: string,
+  content: string,
+  stylesheet: string,
+): string {
   return `<!doctype html>
     <html lang="ko">
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" href="${escapeHtml(stylesheet)}" />
         <title>${escapeHtml(title)}</title>
     </head>
     <body>

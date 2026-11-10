@@ -18,6 +18,7 @@ export function renderPostPage(post: PostPageInput): string {
     </article>
     <a href="../../index.html">글 목록으로</a>
     `;
+  const stylesheet = '../../assets/main.css';
 
-  return renderLayout(post.title, articleHtml);
+  return renderLayout(post.title, articleHtml, stylesheet);
 }

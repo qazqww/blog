@@ -1,4 +1,4 @@
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, writeFile, copyFile } from 'node:fs/promises';
 import path from 'node:path';
 import { loadPosts } from './loader.js';
 import { parsePost } from './parser.js';
@@ -40,4 +40,7 @@ loadPosts('./content/posts').then(async (posts) => {
   const homepageHtml = renderHomePage(summaryPosts);
   await writeFile('dist/index.html', homepageHtml, 'utf-8');
   console.log('Homepage generated at dist/index.html');
+
+  await mkdir('dist/assets', { recursive: true });
+  await copyFile('src/styles/main.css', 'dist/assets/main.css');
 });
