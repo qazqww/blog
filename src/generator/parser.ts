@@ -6,6 +6,7 @@ export interface ParsedPost {
   title: string;
   date: string;
   body: string;
+  tags: string[];
 }
 
 export function parsePost(source: PostSource): ParsedPost {
@@ -31,11 +32,34 @@ export function parsePost(source: PostSource): ParsedPost {
     throw new Error('Invalid date in front matter of post: ' + source.filePath);
   }
 
+  const tags = 'tags' in metadata ? metadata.tags : [];
+
+  if (
+    !Array.isArray(tags) ||
+    !tags.every(
+      (tag) =>
+        typeof tag === 'string' &&
+        tag
+          .trim()
+          .toLowerCase()
+          .match(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
+    )
+  ) {
+    throw new Error(
+      'Missing or invalid tags in front matter of post: ' + source.filePath,
+    );
+  }
+
+  const uniqueTags: string[] = [
+    ...new Set(tags.map((tag) => tag.trim().toLowerCase())),
+  ];
+
   return {
     filePath: source.filePath,
     title: metadata.title,
     date: metadata.date,
     body: result.content,
+    tags: uniqueTags,
   };
 }
 

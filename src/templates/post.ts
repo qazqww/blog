@@ -4,6 +4,7 @@ export interface PostPageInput {
   title: string;
   date: string;
   body: string;
+  tags: string[];
 }
 
 export function renderPostPage(post: PostPageInput): string {
@@ -14,6 +15,13 @@ export function renderPostPage(post: PostPageInput): string {
             <time datetime="${escapeHtml(post.date)}">
             ${escapeHtml(post.date)}</time>
         </p>
+        ${
+          post.tags.length > 0
+            ? `<ul class="tags">
+          ${post.tags.map((tag) => `<li><a href="${escapeHtml('../../tags/' + tag + '/index.html')}">${escapeHtml(tag)}</a></li>`).join('\n')}
+        </ul>`
+            : ''
+        }
         ${post.body}
     </article>
     <a href="../../index.html">글 목록으로</a>
