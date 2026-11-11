@@ -7,6 +7,7 @@ import { getPostSlug } from './route.js';
 import { renderPostPage } from '../templates/post.js';
 import { renderHomePage, type PostSummary } from '../templates/home.js';
 import { renderTagPage } from '../templates/tag.js';
+import { createSearchIndex } from './search-index.js';
 
 loadPosts('./content/posts').then(async (posts) => {
   const parsedPosts = posts.map((post) => parsePost(post));
@@ -64,4 +65,8 @@ loadPosts('./content/posts').then(async (posts) => {
 
   await mkdir('dist/assets', { recursive: true });
   await copyFile('src/styles/main.css', 'dist/assets/main.css');
+
+  const searchIndex = createSearchIndex(parsedPosts);
+  const searchJson = JSON.stringify(searchIndex, null, 2);
+  await writeFile('dist/search-index.json', searchJson, 'utf-8');
 });

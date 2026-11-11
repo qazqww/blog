@@ -4,7 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "check": "tsc --noEmit && tsc -p tsconfig.client.json --noEmit",
+    "build": "npm run check && tsx src/generator/build.ts && tsc -p tsconfig.client.json",
+    "preview": "http-server dist -a 127.0.0.1 -p 8000 -c-1 -o"
   },
   "keywords": [],
   "author": "",
@@ -13,6 +16,7 @@
   "devDependencies": {
     "@types/node": "^26.6.5",
     "gray-matter": "^4.0.3",
+    "http-server": "^14.1.1",
     "markdown-it": "^15.0.3",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2"
