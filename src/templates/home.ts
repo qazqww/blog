@@ -24,7 +24,13 @@ export function renderHomePage(posts: PostSummary[]): string {
           )
           .join('\n')}
     </ul>
-    <p id="search-status" role="status">검색 데이터 준비 중...</p>
+    <section>
+      <h2 id="search-heading">글 검색</h2>
+      <label for="search-input">제목 or 태그</label>
+      <input id="search-input" type="search" disabled>
+      <p id="search-status" role="status">검색 데이터 준비 중...</p>
+      <ul id="search-results"></ul>
+    </section>
     <noscript>검색 기능에는 Javascript가 필요합니다. 아래 글 목록은 이용할 수 있습니다.</noscript>
     <script type="module" src="assets/client/search.js"></script>
     `;

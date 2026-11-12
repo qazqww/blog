@@ -1,10 +1,37 @@
 import type { SearchEntry } from '../shared/search.js';
+import { filterSearchEntries } from './filter.js';
 
-let searchStatus = document.querySelector('#search-status');
+const searchStatus = document.querySelector('#search-status');
 try {
   const searchEntries = await loadSearchEntries();
   if (searchStatus !== null) {
     searchStatus.textContent = `검색 가능한 글 : ${searchEntries.length}개`;
+  }
+  const searchInput = document.querySelector('#search-input');
+  const searchResult = document.querySelector('#search-results');
+  if (
+    searchInput instanceof HTMLInputElement &&
+    searchResult instanceof HTMLUListElement
+  ) {
+    searchInput.disabled = false;
+    searchInput?.addEventListener('input', (e) => {
+      const searchedEntries = filterSearchEntries(
+        searchEntries,
+        searchInput.value,
+      );
+      if (searchStatus != null) {
+        if (searchInput.value.trim() === '') {
+          searchStatus.textContent = '검색어를 입력하세요.';
+        } else if (searchedEntries.length === 0) {
+          searchStatus.textContent = '검색 결과가 없습니다.';
+        } else {
+          searchStatus.textContent = `검색 결과 ${searchedEntries.length}개`;
+        }
+      }
+      renderSearchResults(searchResult, searchedEntries);
+    });
+  } else {
+    throw new Error('HTML 요소 탐색 에러');
   }
 } catch (err) {
   console.error('검색 데이터 로딩 중 에러 발생 => ', err);
@@ -25,6 +52,25 @@ export async function loadSearchEntries(): Promise<SearchEntry[]> {
   }
 
   return data;
+}
+
+export function renderSearchResults(ul: HTMLElement, entries: SearchEntry[]) {
+  ul.replaceChildren();
+  for (const entry of entries) {
+    const li = document.createElement('li');
+    const title = document.createElement('p');
+    const a = document.createElement('a');
+    a.href = entry.url;
+    a.textContent = entry.title;
+    const time = document.createElement('time');
+    time.textContent = entry.date;
+    time.dateTime = entry.date;
+
+    li.appendChild(title);
+    title.appendChild(a);
+    li.appendChild(time);
+    ul.appendChild(li);
+  }
 }
 
 function isSearchEntryArray(value: unknown): value is SearchEntry[] {
