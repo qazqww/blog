@@ -8,6 +8,7 @@ import { renderPostPage } from '../templates/post.js';
 import { renderHomePage, type PostSummary } from '../templates/home.js';
 import { renderTagPage } from '../templates/tag.js';
 import { createSearchIndex } from './search-index.js';
+import { createSitemap, type SitemapEntry } from './sitemap.js';
 
 loadPosts('./content/posts').then(async (posts) => {
   const parsedPosts = posts.map((post) => parsePost(post));
@@ -44,6 +45,16 @@ loadPosts('./content/posts').then(async (posts) => {
   await writeFile('dist/index.html', homepageHtml, 'utf-8');
   console.log('Homepage generated at dist/index.html');
 
+  const sitemapEntries: SitemapEntry[] = [];
+  const homeEntry: SitemapEntry = {
+    path: 'index.html',
+  };
+  const latestPost = summaryPosts[0];
+  if (latestPost !== undefined) {
+    homeEntry.lastmod = latestPost.date;
+  }
+  sitemapEntries.push(homeEntry);
+
   const postsByTag = new Map<string, PostSummary[]>();
   for (const post of summaryPosts) {
     for (const tag of post.tags) {
@@ -52,6 +63,11 @@ loadPosts('./content/posts').then(async (posts) => {
       }
       postsByTag.get(tag)!.push(post);
     }
+
+    sitemapEntries.push({
+      path: post.url,
+      lastmod: post.date,
+    });
   }
 
   for (const [tag, posts] of postsByTag.entries()) {
@@ -61,6 +77,14 @@ loadPosts('./content/posts').then(async (posts) => {
     const outputPath = path.join(outputDirectory, 'index.html');
     await writeFile(outputPath, tagPageHtml, 'utf-8');
     console.log(`Tag page for ${tag} generated at ${outputPath}`);
+
+    const tagEntry: SitemapEntry = {
+      path: `tags/${tag}/index.html`,
+    };
+    if (posts[0] !== undefined) {
+      tagEntry.lastmod = posts[0].date;
+    }
+    sitemapEntries.push(tagEntry);
   }
 
   await mkdir('dist/assets', { recursive: true });
@@ -69,4 +93,7 @@ loadPosts('./content/posts').then(async (posts) => {
   const searchIndex = createSearchIndex(parsedPosts);
   const searchJson = JSON.stringify(searchIndex, null, 2);
   await writeFile('dist/search-index.json', searchJson, 'utf-8');
+
+  const sitemap = createSitemap(sitemapEntries);
+  await writeFile('dist/sitemap.xml', sitemap, 'utf-8');
 });
