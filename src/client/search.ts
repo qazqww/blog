@@ -69,6 +69,13 @@ export function renderSearchResults(ul: HTMLElement, entries: SearchEntry[]) {
     li.appendChild(title);
     title.appendChild(a);
     li.appendChild(time);
+
+    if (entry.description !== '') {
+      const desc = document.createElement('p');
+      desc.textContent = entry.description;
+      li.appendChild(desc);
+    }
+
     ul.appendChild(li);
   }
 }
@@ -91,7 +98,9 @@ function isSearchEntryArray(value: unknown): value is SearchEntry[] {
       !('tags' in val) ||
       !Array.isArray(val.tags) ||
       !val.tags.every((tag: unknown) => typeof tag === 'string') ||
-      !pattern.test(val.url)
+      !pattern.test(val.url) ||
+      !('description' in val) ||
+      typeof val.description !== 'string'
     ) {
       return false;
     }

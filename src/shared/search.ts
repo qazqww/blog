@@ -3,4 +3,5 @@ export interface SearchEntry {
   date: string;
   tags: string[];
   url: string;
+  description: string;
 }

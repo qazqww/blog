@@ -8,6 +8,7 @@ export function createSearchIndex(posts: ParsedPost[]): SearchEntry[] {
     date: post.date,
     tags: [...post.tags],
     url: `posts/${getPostSlug(post.filePath)}/index.html`,
+    description: post.description,
   }));
   searchEntries.sort(
     (a, b) => b.date.localeCompare(a.date) || a.url.localeCompare(b.url),

@@ -7,6 +7,7 @@ export interface ParsedPost {
   date: string;
   body: string;
   tags: string[];
+  description: string;
 }
 
 export function parsePost(source: PostSource): ParsedPost {
@@ -32,8 +33,18 @@ export function parsePost(source: PostSource): ParsedPost {
     throw new Error('Invalid date in front matter of post: ' + source.filePath);
   }
 
-  const tags = 'tags' in metadata ? metadata.tags : [];
+  let description: string;
+  if (!('description' in metadata)) {
+    description = '';
+  } else if (typeof metadata.description !== 'string') {
+    throw new Error(
+      'Invalid description in front matter of post: ' + source.filePath,
+    );
+  } else {
+    description = metadata.description.trim();
+  }
 
+  const tags = 'tags' in metadata ? metadata.tags : [];
   if (
     !Array.isArray(tags) ||
     !tags.every(
@@ -60,6 +71,7 @@ export function parsePost(source: PostSource): ParsedPost {
     date: metadata.date,
     body: result.content,
     tags: uniqueTags,
+    description,
   };
 }
 

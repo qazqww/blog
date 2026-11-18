@@ -5,6 +5,7 @@ export interface PostPageInput {
   date: string;
   body: string;
   tags: string[];
+  description: string;
 }
 
 export function renderPostPage(post: PostPageInput): string {
@@ -28,5 +29,5 @@ export function renderPostPage(post: PostPageInput): string {
     `;
   const stylesheet = '../../assets/main.css';
 
-  return renderLayout(post.title, articleHtml, stylesheet);
+  return renderLayout(post.title, articleHtml, stylesheet, post.description);
 }

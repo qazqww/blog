@@ -9,6 +9,7 @@ export interface PostSummary {
 export function renderHomePage(posts: PostSummary[]): string {
   const title = 'Blog Title';
   const introduce = 'Welcome!';
+  const description = '블로그의 홈 페이지입니다.';
   const contentList = `
     <h1>${title}</h1>
     <p>${introduce}</p>
@@ -36,5 +37,5 @@ export function renderHomePage(posts: PostSummary[]): string {
     `;
   const stylesheet = 'assets/main.css';
 
-  return renderLayout(title, contentList, stylesheet);
+  return renderLayout(title, contentList, stylesheet, description);
 }
