@@ -1,4 +1,4 @@
-import { renderLayout, escapeHtml } from './layout.js';
+import { renderLayout, escapeHtml, type LayoutInput } from './layout.js';
 
 export interface PostPageInput {
   title: string;
@@ -6,6 +6,7 @@ export interface PostPageInput {
   body: string;
   tags: string[];
   description: string;
+  canonicalUrl: string;
 }
 
 export function renderPostPage(post: PostPageInput): string {
@@ -29,5 +30,13 @@ export function renderPostPage(post: PostPageInput): string {
     `;
   const stylesheet = '../../assets/main.css';
 
-  return renderLayout(post.title, articleHtml, stylesheet, post.description);
+  const postLayout: LayoutInput = {
+    title: post.title,
+    content: articleHtml,
+    stylesheet,
+    canonicalUrl: post.canonicalUrl,
+    description: post.description,
+  };
+
+  return renderLayout(postLayout);
 }

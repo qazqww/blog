@@ -9,6 +9,7 @@ import { renderHomePage, type PostSummary } from '../templates/home.js';
 import { renderTagPage } from '../templates/tag.js';
 import { createSearchIndex } from './search-index.js';
 import { createSitemap, type SitemapEntry } from './sitemap.js';
+import { toAbsoluteUrl } from './site-url.js';
 
 loadPosts('./content/posts').then(async (posts) => {
   const parsedPosts = posts.map((post) => parsePost(post));
@@ -22,18 +23,21 @@ loadPosts('./content/posts').then(async (posts) => {
 
   const summaryPosts = [];
   for (const post of renderedPosts) {
-    const pageHtml = renderPostPage(post);
     const slugPath = getPostSlug(post.filePath);
+    const postPath = `posts/${slugPath}/index.html`;
+    const canonicalUrl = toAbsoluteUrl(postPath);
+    const postHtml = renderPostPage({ ...post, canonicalUrl });
+
     const outputDirectory = path.join('dist', 'posts', slugPath);
     await mkdir(outputDirectory, { recursive: true });
     const outputPath = path.join(outputDirectory, 'index.html');
-    await writeFile(outputPath, pageHtml, 'utf-8');
+    await writeFile(outputPath, postHtml, 'utf-8');
     console.log(`Post page generated at ${outputPath}`);
 
     summaryPosts.push({
       title: post.title,
       date: post.date,
-      url: `posts/${slugPath}/index.html`,
+      url: postPath,
       tags: post.tags,
     });
   }
@@ -41,13 +45,15 @@ loadPosts('./content/posts').then(async (posts) => {
   summaryPosts.sort(
     (a, b) => b.date.localeCompare(a.date) || a.url.localeCompare(b.url),
   );
-  const homepageHtml = renderHomePage(summaryPosts);
+  const homePath = 'index.html';
+  const homeCanonicalUrl = toAbsoluteUrl(homePath);
+  const homepageHtml = renderHomePage(summaryPosts, homeCanonicalUrl);
   await writeFile('dist/index.html', homepageHtml, 'utf-8');
   console.log('Homepage generated at dist/index.html');
 
   const sitemapEntries: SitemapEntry[] = [];
   const homeEntry: SitemapEntry = {
-    path: 'index.html',
+    path: homePath,
   };
   const latestPost = summaryPosts[0];
   if (latestPost !== undefined) {
@@ -71,15 +77,17 @@ loadPosts('./content/posts').then(async (posts) => {
   }
 
   for (const [tag, posts] of postsByTag.entries()) {
-    const tagPageHtml = renderTagPage(tag, posts);
     const outputDirectory = path.join('dist', 'tags', tag);
     await mkdir(outputDirectory, { recursive: true });
     const outputPath = path.join(outputDirectory, 'index.html');
+    const tagPath = `tags/${tag}/index.html`;
+    const tagCanonicalUrl = toAbsoluteUrl(tagPath);
+    const tagPageHtml = renderTagPage(tag, posts, tagCanonicalUrl);
     await writeFile(outputPath, tagPageHtml, 'utf-8');
     console.log(`Tag page for ${tag} generated at ${outputPath}`);
 
     const tagEntry: SitemapEntry = {
-      path: `tags/${tag}/index.html`,
+      path: tagPath,
     };
     if (posts[0] !== undefined) {
       tagEntry.lastmod = posts[0].date;

@@ -1,4 +1,4 @@
-import { renderLayout, escapeHtml } from './layout.js';
+import { renderLayout, escapeHtml, type LayoutInput } from './layout.js';
 
 export interface PostSummary {
   title: string;
@@ -6,7 +6,10 @@ export interface PostSummary {
   url: string;
 }
 
-export function renderHomePage(posts: PostSummary[]): string {
+export function renderHomePage(
+  posts: PostSummary[],
+  canonicalUrl: string,
+): string {
   const title = 'Blog Title';
   const introduce = 'Welcome!';
   const description = '블로그의 홈 페이지입니다.';
@@ -37,5 +40,13 @@ export function renderHomePage(posts: PostSummary[]): string {
     `;
   const stylesheet = 'assets/main.css';
 
-  return renderLayout(title, contentList, stylesheet, description);
+  const homepageLayout: LayoutInput = {
+    title,
+    content: contentList,
+    stylesheet,
+    canonicalUrl,
+    description,
+  };
+
+  return renderLayout(homepageLayout);
 }

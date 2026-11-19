@@ -1,4 +1,4 @@
-import { siteConfig } from '../config.js';
+import { toAbsoluteUrl } from './site-url.js';
 
 export interface SitemapEntry {
   path: string;
@@ -6,15 +6,12 @@ export interface SitemapEntry {
 }
 
 export function createSitemap(entries: SitemapEntry[]): string {
-  if (!siteConfig.url.endsWith('/')) {
-    throw new Error('siteConfig.url must end with "/".');
-  }
   const source = `<?xml version="1.0" encoding="UTF-8"?>
   <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     ${entries
       .map(
         (entry) => `<url>
-          <loc>${escapeXml(new URL(entry.path, siteConfig.url).href)}</loc>
+          <loc>${escapeXml(toAbsoluteUrl(entry.path))}</loc>
           ${
             typeof entry.lastmod !== 'undefined'
               ? `<lastmod>${escapeXml(entry.lastmod)}</lastmod>`

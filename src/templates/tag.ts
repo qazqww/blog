@@ -1,7 +1,11 @@
 import type { PostSummary } from './home.js';
-import { renderLayout, escapeHtml } from './layout.js';
+import { renderLayout, escapeHtml, type LayoutInput } from './layout.js';
 
-export function renderTagPage(tag: string, posts: PostSummary[]): string {
+export function renderTagPage(
+  tag: string,
+  posts: PostSummary[],
+  canonicalUrl: string,
+): string {
   const title = `${escapeHtml(tag)} 태그의 글`;
   const content = `
     <h1>${title}</h1>
@@ -17,5 +21,13 @@ export function renderTagPage(tag: string, posts: PostSummary[]): string {
       <a href="${escapeHtml('../../index.html')}">홈으로</a>
     `;
   const stylesheet = '../../assets/main.css';
-  return renderLayout(title, content, stylesheet);
+
+  const tagLayout: LayoutInput = {
+    title,
+    content,
+    stylesheet,
+    canonicalUrl,
+  };
+
+  return renderLayout(tagLayout);
 }

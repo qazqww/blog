@@ -1,5 +1,5 @@
 export interface SiteConfig {
-  url: string;
+  readonly url: string;
 }
 
 export const siteConfig: SiteConfig = {
