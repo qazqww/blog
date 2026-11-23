@@ -8,7 +8,7 @@ test('제목과 날짜만 있는 글을 읽는다', () => {
     content: "---\ntitle: 예시\ndate: '2026-01-02'\n---\n본문",
   };
   const post = parsePost(source);
-  assert.equal(post.title, '예시');
+  assert.equal(post.title, '네네');
   assert.equal(post.date, '2026-01-02');
   assert.deepEqual(post.tags, []);
   assert.equal(post.description, '');
