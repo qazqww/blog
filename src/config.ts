@@ -3,5 +3,5 @@ export interface SiteConfig {
 }
 
 export const siteConfig: SiteConfig = {
-  url: 'https://example.github.io/blog/',
+  url: 'https://qazqww.github.io/blog/',
 };
