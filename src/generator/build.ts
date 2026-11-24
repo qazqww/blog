@@ -10,6 +10,7 @@ import { renderTagPage } from '../templates/tag.js';
 import { createSearchIndex } from './search-index.js';
 import { createSitemap, type SitemapEntry } from './sitemap.js';
 import { toAbsoluteUrl } from './site-url.js';
+import { groupPostsByTag } from './tags.js';
 
 loadPosts('./content/posts').then(async (posts) => {
   const parsedPosts = posts.map((post) => parsePost(post));
@@ -61,21 +62,14 @@ loadPosts('./content/posts').then(async (posts) => {
   }
   sitemapEntries.push(homeEntry);
 
-  const postsByTag = new Map<string, PostSummary[]>();
   for (const post of summaryPosts) {
-    for (const tag of post.tags) {
-      if (!postsByTag.has(tag)) {
-        postsByTag.set(tag, []);
-      }
-      postsByTag.get(tag)!.push(post);
-    }
-
     sitemapEntries.push({
       path: post.url,
       lastmod: post.date,
     });
   }
 
+  const postsByTag = groupPostsByTag(summaryPosts);
   for (const [tag, posts] of postsByTag.entries()) {
     const outputDirectory = path.join('dist', 'tags', tag);
     await mkdir(outputDirectory, { recursive: true });
