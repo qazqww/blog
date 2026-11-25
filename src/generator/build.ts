@@ -1,19 +1,50 @@
 import { mkdir, writeFile, copyFile } from 'node:fs/promises';
 import path from 'node:path';
 import { loadPosts } from './loader.js';
-import { parsePost } from './parser.js';
+import { parsePost, type ParsedPost } from './parser.js';
 import { renderMarkdown } from './renderer.js';
 import { getPostSlug } from './route.js';
 import { renderPostPage } from '../templates/post.js';
-import { renderHomePage, type PostSummary } from '../templates/home.js';
+import { renderHomePage } from '../templates/home.js';
 import { renderTagPage } from '../templates/tag.js';
 import { createSearchIndex } from './search-index.js';
 import { createSitemap, type SitemapEntry } from './sitemap.js';
 import { toAbsoluteUrl } from './site-url.js';
 import { groupPostsByTag } from './tags.js';
+import { PostError } from '../common/error.js';
 
-loadPosts('./content/posts').then(async (posts) => {
-  const parsedPosts = posts.map((post) => parsePost(post));
+async function main(): Promise<void> {
+  const errors: string[] = [];
+  const posts = await loadPosts('./content/posts');
+  const parsedPosts: ParsedPost[] = [];
+  for (const post of posts) {
+    let postSlug = '';
+    try {
+      postSlug = getPostSlug(post.filePath);
+    } catch (error) {
+      if (error instanceof PostError) {
+        errors.push(error.message);
+      } else {
+        throw error;
+      }
+    }
+    try {
+      const parsedPost = parsePost(post);
+      parsedPost.postSlug = postSlug;
+      parsedPosts.push(parsedPost);
+    } catch (error) {
+      if (error instanceof PostError) {
+        errors.push(error.message);
+      } else {
+        throw error;
+      }
+    }
+  }
+
+  if (errors.length > 0) {
+    throw errors;
+  }
+
   const renderedPosts = parsedPosts.map((post) => ({
     ...post,
     body: renderMarkdown(post.body),
@@ -24,12 +55,11 @@ loadPosts('./content/posts').then(async (posts) => {
 
   const summaryPosts = [];
   for (const post of renderedPosts) {
-    const slugPath = getPostSlug(post.filePath);
-    const postPath = `posts/${slugPath}/index.html`;
+    const postPath = `posts/${post.postSlug}/index.html`;
     const canonicalUrl = toAbsoluteUrl(postPath);
     const postHtml = renderPostPage({ ...post, canonicalUrl });
 
-    const outputDirectory = path.join('dist', 'posts', slugPath);
+    const outputDirectory = path.join('dist', 'posts', post.postSlug);
     await mkdir(outputDirectory, { recursive: true });
     const outputPath = path.join(outputDirectory, 'index.html');
     await writeFile(outputPath, postHtml, 'utf-8');
@@ -98,4 +128,16 @@ loadPosts('./content/posts').then(async (posts) => {
 
   const sitemap = createSitemap(sitemapEntries);
   await writeFile('dist/sitemap.xml', sitemap, 'utf-8');
+}
+
+main().catch((error: unknown) => {
+  if (Array.isArray(error)) {
+    console.error(`Build failed: ${error.length} invalid post(s)`);
+    for (const e of error) {
+      console.error(`- ${e}`);
+    }
+  } else {
+    console.error(error);
+  }
+  process.exitCode = 1;
 });

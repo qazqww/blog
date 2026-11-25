@@ -1,7 +1,9 @@
+import { PostError } from '../common/error.js';
 import type { PostSource } from './loader.js';
 import matter from 'gray-matter';
 
 export interface ParsedPost {
+  postSlug: string;
   filePath: string;
   title: string;
   date: string;
@@ -14,7 +16,7 @@ export function parsePost(source: PostSource): ParsedPost {
   const result = matter(source.content);
   const metadata: unknown = result.data;
   if (typeof metadata !== 'object' || metadata === null) {
-    throw new Error('Invalid front matter in post: ' + source.filePath);
+    throw new PostError('Invalid front matter in post: ' + source.filePath);
   }
 
   if (
@@ -22,7 +24,7 @@ export function parsePost(source: PostSource): ParsedPost {
     typeof metadata.title !== 'string' ||
     metadata.title.trim() === ''
   ) {
-    throw new Error(
+    throw new PostError(
       'Missing title in front matter of post: ' + source.filePath,
     );
   } else if (
@@ -30,14 +32,16 @@ export function parsePost(source: PostSource): ParsedPost {
     typeof metadata.date !== 'string' ||
     !isValidDate(metadata.date)
   ) {
-    throw new Error('Invalid date in front matter of post: ' + source.filePath);
+    throw new PostError(
+      'Invalid date in front matter of post: ' + source.filePath,
+    );
   }
 
   let description: string;
   if (!('description' in metadata)) {
     description = '';
   } else if (typeof metadata.description !== 'string') {
-    throw new Error(
+    throw new PostError(
       'Invalid description in front matter of post: ' + source.filePath,
     );
   } else {
@@ -56,7 +60,7 @@ export function parsePost(source: PostSource): ParsedPost {
           .match(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
     )
   ) {
-    throw new Error(
+    throw new PostError(
       'Missing or invalid tags in front matter of post: ' + source.filePath,
     );
   }
@@ -66,6 +70,7 @@ export function parsePost(source: PostSource): ParsedPost {
   ];
 
   return {
+    postSlug: '',
     filePath: source.filePath,
     title: metadata.title,
     date: metadata.date,

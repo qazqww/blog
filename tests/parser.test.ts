@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { parsePost } from '../src/generator/parser.js';
+import { PostError } from '../src/common/error.js';
 
 test('제목과 날짜만 있는 글을 읽는다', () => {
   const source = {
@@ -78,4 +79,18 @@ test('설명이 string이 아닐 경우 에러', () => {
   assert.throws(() => parsePost(source), {
     message: `Invalid description in front matter of post: ${source.filePath}`,
   });
+});
+
+test('PostError 발생 확인', () => {
+  const titleErrorSource = {
+    filePath: 'example.md',
+    content: "---\ntitle: ''\ndate: '2026-01-02'\ndescription: 123\n---\n본문",
+  };
+  const dateErrorSource = {
+    filePath: 'example.md',
+    content: '---\ntitle: 예시\ndate: 2026-01-02\ndescription: 123\n---\n본문',
+  };
+
+  assert.throws(() => parsePost(titleErrorSource), PostError);
+  assert.throws(() => parsePost(dateErrorSource), PostError);
 });
