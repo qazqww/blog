@@ -6,6 +6,17 @@ export interface PostSource {
   content: string;
 }
 
+export async function loadPosts(directory: string): Promise<PostSource[]> {
+  const files = await findMarkdownFiles(directory);
+  const posts = await Promise.all(
+    files.map(async (filePath) => ({
+      filePath,
+      content: await readPost(filePath),
+    })),
+  );
+  return posts;
+}
+
 async function readPost(filePath: string): Promise<string> {
   // 파일을 UTF-8 문자열로 읽어 반환
   return await readFile(filePath, 'utf-8');
@@ -19,14 +30,4 @@ async function findMarkdownFiles(directory: string): Promise<string[]> {
       .map((entry) => join(directory, entry.name))
       .sort(),
   );
-}
-
-export async function loadPosts(directory: string): Promise<PostSource[]> {
-  const files = await findMarkdownFiles(directory);
-  const posts: PostSource[] = [];
-  for (const filePath of files) {
-    const content = await readPost(filePath);
-    posts.push({ filePath, content });
-  }
-  return posts;
 }
