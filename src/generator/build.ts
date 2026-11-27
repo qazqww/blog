@@ -1,26 +1,27 @@
-import { mkdir, writeFile, copyFile } from 'node:fs/promises';
+import { copyFile, mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import { PostError } from '../common/error.js';
+import { renderHomePage } from '../templates/home.js';
+import { renderPostPage } from '../templates/post.js';
+import { renderTagPage } from '../templates/tag.js';
 import { loadPosts } from './loader.js';
 import { parsePost, type ParsedPost } from './parser.js';
+import { sortPosts } from './posts.js';
 import { renderMarkdown } from './renderer.js';
-import { getPostSlug } from './route.js';
-import { renderPostPage } from '../templates/post.js';
-import { renderHomePage } from '../templates/home.js';
-import { renderTagPage } from '../templates/tag.js';
+import { getPostPath } from './route.js';
 import { createSearchIndex } from './search-index.js';
-import { createSitemap, type SitemapEntry } from './sitemap.js';
 import { toAbsoluteUrl } from './site-url.js';
+import { createSitemap, type SitemapEntry } from './sitemap.js';
 import { groupPostsByTag } from './tags.js';
-import { PostError } from '../common/error.js';
 
 async function main(): Promise<void> {
   const errors: string[] = [];
   const posts = await loadPosts('./content/posts');
   const parsedPosts: ParsedPost[] = [];
   for (const post of posts) {
-    let postSlug = '';
+    let postPath = '';
     try {
-      postSlug = getPostSlug(post.filePath);
+      postPath = getPostPath(post.filePath);
     } catch (error) {
       if (error instanceof PostError) {
         errors.push(error.message);
@@ -30,7 +31,7 @@ async function main(): Promise<void> {
     }
     try {
       const parsedPost = parsePost(post);
-      parsedPost.postSlug = postSlug;
+      parsedPost.postPath = postPath;
       parsedPosts.push(parsedPost);
     } catch (error) {
       if (error instanceof PostError) {
@@ -55,27 +56,23 @@ async function main(): Promise<void> {
 
   const summaryPosts = [];
   for (const post of renderedPosts) {
-    const postPath = `posts/${post.postSlug}/index.html`;
-    const canonicalUrl = toAbsoluteUrl(postPath);
+    const canonicalUrl = toAbsoluteUrl(post.postPath);
     const postHtml = renderPostPage({ ...post, canonicalUrl });
+    const outputPath = path.join('dist', post.postPath);
 
-    const outputDirectory = path.join('dist', 'posts', post.postSlug);
-    await mkdir(outputDirectory, { recursive: true });
-    const outputPath = path.join(outputDirectory, 'index.html');
+    await mkdir(path.dirname(outputPath), { recursive: true });
     await writeFile(outputPath, postHtml, 'utf-8');
     console.log(`Post page generated at ${outputPath}`);
 
     summaryPosts.push({
       title: post.title,
       date: post.date,
-      url: postPath,
+      url: post.postPath,
       tags: post.tags,
     });
   }
 
-  summaryPosts.sort(
-    (a, b) => b.date.localeCompare(a.date) || a.url.localeCompare(b.url),
-  );
+  sortPosts(summaryPosts);
   const homePath = 'index.html';
   const homeCanonicalUrl = toAbsoluteUrl(homePath);
   const homepageHtml = renderHomePage(summaryPosts, homeCanonicalUrl);

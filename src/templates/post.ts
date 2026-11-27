@@ -1,4 +1,4 @@
-import { renderLayout, escapeHtml, type LayoutInput } from './layout.js';
+import { escapeHtml, renderLayout, type LayoutInput } from './layout.js';
 
 export interface PostPageInput {
   title: string;

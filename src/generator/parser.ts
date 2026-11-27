@@ -1,9 +1,9 @@
+import matter from 'gray-matter';
 import { PostError } from '../common/error.js';
 import type { PostSource } from './loader.js';
-import matter from 'gray-matter';
 
 export interface ParsedPost {
-  postSlug: string;
+  postPath: string;
   filePath: string;
   title: string;
   date: string;
@@ -70,7 +70,7 @@ export function parsePost(source: PostSource): ParsedPost {
   ];
 
   return {
-    postSlug: '',
+    postPath: '',
     filePath: source.filePath,
     title: metadata.title,
     date: metadata.date,
