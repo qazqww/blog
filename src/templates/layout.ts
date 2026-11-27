@@ -4,6 +4,7 @@ export interface LayoutInput {
   stylesheet: string;
   canonicalUrl: string;
   description?: string;
+  favicon: string;
 }
 
 export function renderLayout(input: LayoutInput): string {
@@ -17,6 +18,7 @@ export function renderLayout(input: LayoutInput): string {
             ? `<meta name="description" content="${escapeHtml(input.description)}" />`
             : ''
         }
+        <link rel="icon" href="${escapeHtml(input.favicon)}" />
         <link rel="stylesheet" href="${escapeHtml(input.stylesheet)}" />
         <link rel="canonical" href="${escapeHtml(input.canonicalUrl)}" />
         <title>${escapeHtml(input.title)}</title>

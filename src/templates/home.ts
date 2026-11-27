@@ -39,6 +39,7 @@ export function renderHomePage(
     <script type="module" src="assets/client/search.js"></script>
     `;
   const stylesheet = 'assets/main.css';
+  const favicon = 'favicon.ico';
 
   const homepageLayout: LayoutInput = {
     title,
@@ -46,6 +47,7 @@ export function renderHomePage(
     stylesheet,
     canonicalUrl,
     description,
+    favicon,
   };
 
   return renderLayout(homepageLayout);

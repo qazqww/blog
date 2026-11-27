@@ -121,6 +121,7 @@ async function main(): Promise<void> {
 
   await mkdir('dist/assets', { recursive: true });
   await copyFile('src/styles/main.css', 'dist/assets/main.css');
+  await copyFile('public/favicon.ico', 'dist/favicon.ico');
 
   const searchIndex = createSearchIndex(parsedPosts);
   const searchJson = JSON.stringify(searchIndex, null, 2);

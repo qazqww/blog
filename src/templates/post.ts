@@ -29,6 +29,7 @@ export function renderPostPage(post: PostPageInput): string {
     <a href="../../index.html">글 목록으로</a>
     `;
   const stylesheet = '../../assets/main.css';
+  const favicon = '../../favicon.ico';
 
   const postLayout: LayoutInput = {
     title: post.title,
@@ -36,6 +37,7 @@ export function renderPostPage(post: PostPageInput): string {
     stylesheet,
     canonicalUrl: post.canonicalUrl,
     description: post.description,
+    favicon,
   };
 
   return renderLayout(postLayout);

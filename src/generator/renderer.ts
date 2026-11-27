@@ -5,12 +5,7 @@ const defaultImage = markdown.renderer.rules.image;
 
 markdown.renderer.rules.image = (tokens, idx, options, env, self) => {
   const token = tokens[idx];
-  if (typeof env?.imageCount === 'number' && env?.imageCount == 0) {
-    token?.attrSet('fetchpriority', 'high');
-    env.imageCount++;
-  } else {
-    token?.attrSet('loading', 'lazy');
-  }
+  token?.attrSet('fetchpriority', 'high');
   return defaultImage!(tokens, idx, options, env, self);
 };
 
